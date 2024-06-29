@@ -1,4 +1,4 @@
-package com.example.products;
+package com.api.raphael.products;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

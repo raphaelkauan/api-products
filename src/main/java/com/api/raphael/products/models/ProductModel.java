@@ -1,4 +1,4 @@
-package com.example.products.models;
+package com.api.raphael.products.models;
 
 import jakarta.persistence.*;
 import org.springframework.hateoas.RepresentationModel;

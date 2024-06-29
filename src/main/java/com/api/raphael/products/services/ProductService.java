@@ -1,14 +1,17 @@
-package com.example.products.controllers;
+package com.api.raphael.products.services;
 
-import com.example.products.dtos.ProductRecordDto;
-import com.example.products.models.ProductModel;
-import com.example.products.repository.ProductRepository;
+import com.api.raphael.products.controllers.ProductController;
+import com.api.raphael.products.dtos.ProductDto;
+import com.api.raphael.products.models.ProductModel;
+import com.api.raphael.products.repository.ProductRepository;
 import jakarta.validation.Valid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,33 +20,29 @@ import java.util.UUID;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
-@RestController
-public class ProductController {
+@Service
+public class ProductService {
 
     @Autowired
     ProductRepository productRepository;
 
-    @PostMapping("/products")
-    public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductRecordDto productRecordDto) {
-        var productModel = new ProductModel();
-        BeanUtils.copyProperties(productRecordDto, productModel);
+    public ResponseEntity<ProductModel> saveProduct(@RequestBody @Valid ProductDto productDto) {
+        ProductModel productModel = new ProductModel();
+        BeanUtils.copyProperties(productDto, productModel);
         return ResponseEntity.status(HttpStatus.CREATED).body(productRepository.save(productModel));
     }
 
-    @GetMapping("/products")
     public ResponseEntity<List<ProductModel>> getAllProducts() {
-        List<ProductModel> productsList = productRepository.findAll();
-        if(!productsList.isEmpty()) {
-            for(ProductModel product : productsList) {
+        List<ProductModel> productList = productRepository.findAll();
+        if(!productList.isEmpty()) {
+            for (ProductModel product : productList) {
                 UUID id = product.getIdProduct();
                 product.add(linkTo(methodOn(ProductController.class).getOneProduct(id)).withSelfRel());
             }
         }
-
-        return ResponseEntity.status(HttpStatus.OK).body(productsList);
+        return ResponseEntity.status(HttpStatus.OK).body(productList);
     }
 
-    @GetMapping("/products/{id}")
     public ResponseEntity<Object> getOneProduct(@PathVariable(value = "id") UUID id) {
         Optional<ProductModel> product = productRepository.findById(id);
         if(product.isEmpty()) {
@@ -53,24 +52,23 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.OK).body(product.get());
     }
 
-    @PutMapping("/products/{id}")
-    public ResponseEntity<Object> updateProduct(@PathVariable(value = "id") UUID id, @RequestBody @Valid ProductRecordDto productRecordDto) {
+    public ResponseEntity<Object> updateProduct(@PathVariable(value = "id") UUID id, @RequestBody @Valid ProductDto productDto) {
         Optional<ProductModel> product = productRepository.findById(id);
         if(product.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
         }
         var productModel = product.get();
-        BeanUtils.copyProperties(productRecordDto, productModel);
+        BeanUtils.copyProperties(productDto, productModel);
         return ResponseEntity.status(HttpStatus.OK).body(productRepository.save(productModel));
     }
 
-    @DeleteMapping("/products/{id}")
     public ResponseEntity<Object> deleteProduct(@PathVariable(value = "id") UUID id) {
         Optional<ProductModel> product = productRepository.findById(id);
         if(product.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
         }
         productRepository.delete(product.get());
-        return ResponseEntity.status(HttpStatus.OK).body("Product deleted with successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("Product deleted with successfully!");
     }
+
 }

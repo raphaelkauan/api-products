@@ -1,6 +1,6 @@
-package com.example.products.repository;
+package com.api.raphael.products.repository;
 
-import com.example.products.models.ProductModel;
+import com.api.raphael.products.models.ProductModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
